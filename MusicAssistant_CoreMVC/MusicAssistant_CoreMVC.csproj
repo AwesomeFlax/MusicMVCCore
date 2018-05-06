@@ -5,6 +5,11 @@
     <UserSecretsId>aspnet-MusicAssistant_CoreMVC-2225B1A2-11B8-4A65-B5D8-0B5F9FA7F078</UserSecretsId>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Data\Migrations\20180505221353_try1.cs" />
+    <Compile Remove="Data\Migrations\20180505221353_try1.Designer.cs" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.6" />
