@@ -60,7 +60,7 @@ namespace MusicAssistant_CoreMVC.Controllers
         public IActionResult Create()
         {
             var p = new SongViewModel();
-            p.AlbumsList= _context.Albums.ToList();
+            p.AlbumsList = _context.Albums.ToList();
             return View(p);
         }
 
@@ -103,7 +103,7 @@ namespace MusicAssistant_CoreMVC.Controllers
             p.SongText = songModel.SongText;
             p.Album = songModel.Album;
             p.AlbumsList = _context.Albums.ToList();
-
+           
             return View(p);
         }
 
@@ -112,7 +112,7 @@ namespace MusicAssistant_CoreMVC.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(long id, [Bind("Id,Name,SongText")] SongModel songModel)
+        public async Task<IActionResult> Edit(long id, [Bind("Id,Name,Album,SongText")] SongModel songModel)
         {
             if (id != songModel.Id)
             {
@@ -123,6 +123,7 @@ namespace MusicAssistant_CoreMVC.Controllers
             {
                 try
                 {
+                    songModel.Album = _context.Albums.Single(x => x.Id == songModel.Album.Id);
                     _context.Update(songModel);
                     await _context.SaveChangesAsync();
                 }

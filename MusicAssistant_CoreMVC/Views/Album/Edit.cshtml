@@ -1,4 +1,4 @@
-﻿@model MusicAssistantMvcCore.Models.AlbumModel
+﻿@model MusicAssistantMvcCore.Models.AlbumViewModel
 
 @{
     ViewData["Title"] = "Edit";
@@ -13,6 +13,12 @@
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
+            <label asp-for="Artist" class="control-label"></label>
+            @Html.DropDownListFor(model => model.Artist.Id,
+                             new SelectList(Model.ArtistsList, "Id", "Pseudonym"),
+                             "- Please Select -",
+                             new { @class = "form-control" })
+            <span asp-validation-for="Artist" class="text-danger"></span>
             <div class="form-group">
                 <label asp-for="Name" class="control-label"></label>
                 <input asp-for="Name" class="form-control" />

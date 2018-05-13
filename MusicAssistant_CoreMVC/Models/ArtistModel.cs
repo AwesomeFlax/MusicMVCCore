@@ -25,5 +25,5 @@ namespace MusicAssistantMvcCore.Models
         public ICollection<RewardModel> Reward { get; set; }
         public ICollection<AlbumModel> Album { get; set; }
         public ICollection<UserFollowModel> UserFollow { get; set; }
-    }                                       
+    }
 }

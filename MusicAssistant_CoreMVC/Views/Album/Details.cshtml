@@ -1,4 +1,4 @@
-﻿@model MusicAssistantMvcCore.Models.AlbumModel
+﻿@model MusicAssistantMvcCore.Models.AlbumViewModel
 
 @{
     ViewData["Title"] = "Details";
@@ -34,13 +34,41 @@
         <dd>
             @Html.DisplayFor(model => model.Description)
         </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.AlbumPhotoUrl)
-        </dt>
         <dd>
-            @Html.DisplayFor(model => model.AlbumPhotoUrl)
+            <img src="@Url.Content(Model.AlbumPhotoUrl)" style="height:250px;width:250px;" />
         </dd>
     </dl>
+</div>
+<div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Song)
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Song)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Name)
+                    </td>
+                    <td>
+                        @if (Model.UserCollections.Where(x => x.SongId == item.Id).Count() == 0)
+                        {
+                            <a asp-action="AddOrRemoveCollection" asp-controller="Album" asp-route-id="@item.Id">+</a>
+                        }
+                        else
+                        {
+                            <a asp-action="AddOrRemoveCollection" asp-controller="Album" asp-route-id="@item.Id">x</a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 </div>
 <div>
     <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |

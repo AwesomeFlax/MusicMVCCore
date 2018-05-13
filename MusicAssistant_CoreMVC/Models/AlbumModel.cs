@@ -14,9 +14,15 @@ namespace MusicAssistantMvcCore.Models
         [MaxLength(50)] public string Name { get; set; }
         public string Genre { get; set; }
         [Column(TypeName = "DateTime2")] public DateTime Created { get; set; }
-        [MaxLength(400)] public string Description { get; set; }
+        public string Description { get; set; }
         public string AlbumPhotoUrl { get; set; }
 
         public ICollection<SongModel> Song { get; set; }
+    }
+
+    public class AlbumViewModel : AlbumModel
+    {
+        public List<ArtistModel> ArtistsList { get; set; }
+        public List<UserCollectionModel> UserCollections { get; set; }
     }
 }

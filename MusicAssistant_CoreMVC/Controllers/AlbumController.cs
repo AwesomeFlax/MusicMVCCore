@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MusicAssistantMvcCore.Models;
 using MusicAssistant_CoreMVC.Data;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using MusicAssistant_CoreMVC.Models;
 
 namespace MusicAssistant_CoreMVC.Controllers
 {
@@ -20,9 +23,15 @@ namespace MusicAssistant_CoreMVC.Controllers
         }
 
         // GET: Album
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            return View(await _context.Albums.ToListAsync());
+            var albumsList = _context.Albums.ToList();
+            foreach (var album in albumsList)
+            {
+                _context.Entry(album).Reference(x => x.Artist).Load();
+            }
+
+            return View(albumsList);
         }
 
         // GET: Album/Details/5
@@ -33,20 +42,38 @@ namespace MusicAssistant_CoreMVC.Controllers
                 return NotFound();
             }
 
-            var albumModel = await _context.Albums
-                .SingleOrDefaultAsync(m => m.Id == id);
-            if (albumModel == null)
+            var albumModel = await _context.Albums.SingleOrDefaultAsync(m => m.Id == id);
+            _context.Entry(albumModel).Collection(x => x.Song).Load();
+            var user = _context.Users.Single(x => x.UserName == User.Identity.Name);
+
+            var p = new AlbumViewModel();
+            p.Id = albumModel.Id;
+            p.Name = albumModel.Name;
+            p.Created = albumModel.Created;
+            p.Genre = albumModel.Genre;
+            p.Artist = albumModel.Artist;
+            p.Description = albumModel.Description;
+            p.Song = albumModel.Song;
+            p.AlbumPhotoUrl = albumModel.AlbumPhotoUrl;
+
+            p.ArtistsList = _context.Artists.ToList();
+            p.UserCollections = _context.UserCollections.Where(x => x.UserId == user.Id).ToList();
+
+            if (p == null)
             {
                 return NotFound();
             }
 
-            return View(albumModel);
+            return View(p);
         }
 
         // GET: Album/Create
+        [Authorize/*(Roles = "Moderator")*/]
         public IActionResult Create()
         {
-            return View();
+            var p = new AlbumViewModel();
+            p.ArtistsList = _context.Artists.ToList();
+            return View(p);
         }
 
         // POST: Album/Create
@@ -54,10 +81,11 @@ namespace MusicAssistant_CoreMVC.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Genre,Created,Description,AlbumPhotoUrl")] AlbumModel albumModel)
+        public async Task<IActionResult> Create([Bind("Id,Name,Genre,Artist,Created,Description,AlbumPhotoUrl")] AlbumModel albumModel)
         {
             if (ModelState.IsValid)
             {
+                albumModel.Artist = _context.Artists.Single(x => x.Id == albumModel.Artist.Id);
                 _context.Add(albumModel);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -66,6 +94,7 @@ namespace MusicAssistant_CoreMVC.Controllers
         }
 
         // GET: Album/Edit/5
+        [Authorize/*(Roles = "Moderator")*/]
         public async Task<IActionResult> Edit(long? id)
         {
             if (id == null)
@@ -78,7 +107,20 @@ namespace MusicAssistant_CoreMVC.Controllers
             {
                 return NotFound();
             }
-            return View(albumModel);
+
+            _context.Entry(albumModel).Reference(x => x.Artist).Load();
+
+            var p = new AlbumViewModel();
+            p.Id = albumModel.Id;
+            p.Name = albumModel.Name;
+            p.Created = albumModel.Created;
+            p.Genre = albumModel.Genre;
+            p.Artist = albumModel.Artist;
+            p.Description = albumModel.Description;
+            p.ArtistsList = _context.Artists.ToList();
+            p.AlbumPhotoUrl = albumModel.AlbumPhotoUrl;
+
+            return View(p);
         }
 
         // POST: Album/Edit/5
@@ -86,7 +128,7 @@ namespace MusicAssistant_CoreMVC.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(long id, [Bind("Id,Name,Genre,Created,Description,AlbumPhotoUrl")] AlbumModel albumModel)
+        public async Task<IActionResult> Edit(long id, [Bind("Id,Name,Genre,Artist,Created,Description,AlbumPhotoUrl")] AlbumModel albumModel)
         {
             if (id != albumModel.Id)
             {
@@ -97,6 +139,7 @@ namespace MusicAssistant_CoreMVC.Controllers
             {
                 try
                 {
+                    albumModel.Artist = _context.Artists.Single(x => x.Id == albumModel.Artist.Id);
                     _context.Update(albumModel);
                     await _context.SaveChangesAsync();
                 }
@@ -117,6 +160,7 @@ namespace MusicAssistant_CoreMVC.Controllers
         }
 
         // GET: Album/Delete/5
+        [Authorize/*(Roles = "Moderator")*/]
         public async Task<IActionResult> Delete(long? id)
         {
             if (id == null)
@@ -137,6 +181,7 @@ namespace MusicAssistant_CoreMVC.Controllers
         // POST: Album/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize/*(Roles = "Moderator")*/]
         public async Task<IActionResult> DeleteConfirmed(long id)
         {
             var albumModel = await _context.Albums.SingleOrDefaultAsync(m => m.Id == id);
@@ -148,6 +193,33 @@ namespace MusicAssistant_CoreMVC.Controllers
         private bool AlbumModelExists(long id)
         {
             return _context.Albums.Any(e => e.Id == id);
+        }
+
+        public IActionResult AddOrRemoveCollection(long? id)
+        {
+            var userCollectionModel = new UserCollectionModel();
+
+            var user = _context.Users.Single(x => x.UserName == User.Identity.Name);
+            userCollectionModel.User = user;
+            userCollectionModel.Song = _context.Songs.Single(x => x.Id == id);
+
+            if (_context.UserCollections
+                .Where(x => x.SongId == id && x.UserId == user.Id)
+                .Count() == 0)
+            {
+                _context.Add(userCollectionModel);
+                _context.SaveChanges();
+            }
+            else
+            {
+                _context.Remove(userCollectionModel);
+                _context.SaveChanges();
+            }
+
+            _context.Entry(userCollectionModel.Song).Reference(x => x.Album).Load();
+            var album = _context.Albums.Single(x => userCollectionModel.Song.Album.Id == x.Id);
+
+            return Redirect("/Album/Details/" + album.Id);
         }
     }
 }

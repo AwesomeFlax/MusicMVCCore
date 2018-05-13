@@ -12,8 +12,7 @@ namespace MusicAssistantMvcCore.Models
         [Key] public long Id { get; set; }
         public AlbumModel Album { get; set; }
         [MaxLength(50)] public string Name { get; set; }
-        [MaxLength(900)] public string SongText { get; set; }
-
+        public string SongText { get; set; }
 
         public ICollection<UserCollectionModel> UserCollection { get; set; }
     }

@@ -70,11 +70,8 @@
         <dd>
             @Html.DisplayFor(model => model.Biography)
         </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.ArtistPhotoUrl)
-        </dt>
         <dd>
-            @Html.DisplayFor(model => model.ArtistPhotoUrl)
+            <img src="@Url.Content(Model.ArtistPhotoUrl)" style="height:250px;width:250px;" />
         </dd>
     </dl>
 </div>
