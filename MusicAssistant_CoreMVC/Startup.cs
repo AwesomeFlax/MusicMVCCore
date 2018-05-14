@@ -61,7 +61,7 @@ namespace MusicAssistant_CoreMVC
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                    template: "{controller=Album}/{action=Index}/{id?}");
             });
         }
     }

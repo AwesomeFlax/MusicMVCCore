@@ -7,9 +7,12 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MusicAssistantMvcCore.Models;
 using MusicAssistant_CoreMVC.Data;
+using System.Data;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MusicAssistant_CoreMVC.Controllers
 {
+    [Authorize(Roles = "Moderator")]
     public class SongController : Controller
     {
         private readonly ApplicationDbContext _context;

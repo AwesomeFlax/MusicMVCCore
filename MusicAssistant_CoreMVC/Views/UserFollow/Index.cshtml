@@ -1,7 +1,7 @@
-﻿@model IEnumerable<MusicAssistantMvcCore.Models.AlbumModel>
+﻿@model IEnumerable<MusicAssistantMvcCore.Models.ArtistModel>
 
 @{
-    ViewData["Title"] = "Library";
+    ViewData["Title"] = "Subscriptions";
 }
 
 <h2>Index</h2>
@@ -13,7 +13,7 @@
             <div class="card my-3">
                 <a asp-action="Details" asp-route-id="@item.Id">
                     <div class="image">
-                        <img src="@Url.Content(item.AlbumPhotoUrl)" style="height:250px;width:250px;"
+                        <img src="@Url.Content(item.ArtistPhotoUrl)" style="height:250px;width:250px;"
                              alt="Album Cover" class="img-thumbnail">
                     </div>
                 </a>
@@ -28,4 +28,3 @@
         </div>
     }
 </div>
-

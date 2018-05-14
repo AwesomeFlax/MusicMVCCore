@@ -13,11 +13,11 @@ using Microsoft.AspNetCore.Authorization;
 namespace MusicAssistant_CoreMVC.Controllers
 {
     [Authorize]
-    public class UserCollectionController : Controller
+    public class UserFollowController : Controller
     {
         private readonly ApplicationDbContext _context;
 
-        public UserCollectionController(ApplicationDbContext context)
+        public UserFollowController(ApplicationDbContext context)
         {
             _context = context;
         }
@@ -25,21 +25,16 @@ namespace MusicAssistant_CoreMVC.Controllers
         // GET: UserCollection
         public IActionResult Index()
         {
-            var applicationDbContext = _context.UserCollections.Include(u => u.Song).Include(u => u.User);
-            var collectionsList = applicationDbContext.Where(x => x.User.UserName == User.Identity.Name);
-            List<AlbumModel> albums = new List<AlbumModel>();
+            var applicationDbContext = _context.UserFollows.Include(u => u.Artist).Include(u => u.User);
+            var followsList = applicationDbContext.Where(x => x.User.UserName == User.Identity.Name);
+            List<ArtistModel> artists = new List<ArtistModel>();
 
-            foreach (var collection in collectionsList)
+            foreach (var follow in followsList)
             {
-                _context.Entry(collection.Song).Reference(x => x.Album).Load();
-                var album = collection.Song.Album;
-                if (!albums.Contains(album))
-                {
-                    albums.Add(album);
-                }
+                artists.Add(follow.Artist);
             }
 
-            return View(albums);
+            return View(artists);
         }
 
         // GET: Album/Details/5
@@ -47,7 +42,7 @@ namespace MusicAssistant_CoreMVC.Controllers
         {
             if (id != null)
             {
-                return Redirect("/Album/Details/" + id);
+                return Redirect("/Artist/Details/" + id);
             }
             else
             {

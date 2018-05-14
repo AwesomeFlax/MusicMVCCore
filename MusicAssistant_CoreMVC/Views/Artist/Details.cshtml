@@ -5,7 +5,16 @@
 }
 
 <h2>Details</h2>
-
+<div>
+    @if (Model.UserFollow.Where(x => x.ArtistId == Model.Id).Count() == 0)
+    {
+        <a asp-action="FollowOrUnfollow" asp-controller="Artist" asp-route-id="@Model.Id">Follow</a>
+    }
+    else
+    {
+        <a asp-action="FollowOrUnfollow" asp-controller="Artist" asp-route-id="@Model.Id">Unfollow</a>
+    }
+</div>
 <div>
     <h4>ArtistModel</h4>
     <hr />
@@ -76,6 +85,9 @@
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
+    @if (User.IsInRole("Moderator"))
+    {
+        <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a>
+    }
     <a asp-action="Index">Back to List</a>
 </div>

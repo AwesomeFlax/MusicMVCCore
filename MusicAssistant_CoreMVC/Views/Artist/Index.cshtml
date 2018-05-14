@@ -6,9 +6,12 @@
 
 <h2>Index</h2>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
+@if (User.IsInRole("Moderator"))
+{
+    <p>
+        <a asp-action="Create">Create New</a>
+    </p>
+}
 
 <div class="row">
     @foreach (var item in Model)
@@ -27,12 +30,15 @@
                             @Html.DisplayFor(modelItem => item.Pseudonym)
                         </a>
                     </h6>
-                    <div class="card-footer">
-                        <div class="d-flex flex-row text-center justify-content-between">
-                            <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
-                            <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    @if (User.IsInRole("Moderator"))
+                    {
+                        <div class="card-footer">
+                            <div class="d-flex flex-row text-center justify-content-between">
+                                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+                                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                            </div>
                         </div>
-                    </div>
+                    }
                 </div>
             </div>
         </div>

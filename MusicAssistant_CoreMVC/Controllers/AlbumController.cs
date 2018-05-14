@@ -44,7 +44,6 @@ namespace MusicAssistant_CoreMVC.Controllers
 
             var albumModel = await _context.Albums.SingleOrDefaultAsync(m => m.Id == id);
             _context.Entry(albumModel).Collection(x => x.Song).Load();
-            var user = _context.Users.Single(x => x.UserName == User.Identity.Name);
 
             var p = new AlbumViewModel();
             p.Id = albumModel.Id;
@@ -55,9 +54,13 @@ namespace MusicAssistant_CoreMVC.Controllers
             p.Description = albumModel.Description;
             p.Song = albumModel.Song;
             p.AlbumPhotoUrl = albumModel.AlbumPhotoUrl;
-
             p.ArtistsList = _context.Artists.ToList();
-            p.UserCollections = _context.UserCollections.Where(x => x.UserId == user.Id).ToList();
+
+            if (User.Identity.Name != null)
+            {
+                var user = _context.Users.Single(x => x.UserName == User.Identity.Name);
+                p.UserCollections = _context.UserCollections.Where(x => x.UserId == user.Id).ToList();
+            }
 
             if (p == null)
             {
@@ -68,7 +71,7 @@ namespace MusicAssistant_CoreMVC.Controllers
         }
 
         // GET: Album/Create
-        [Authorize/*(Roles = "Moderator")*/]
+        [Authorize(Roles = "Moderator")]
         public IActionResult Create()
         {
             var p = new AlbumViewModel();
@@ -94,7 +97,7 @@ namespace MusicAssistant_CoreMVC.Controllers
         }
 
         // GET: Album/Edit/5
-        [Authorize/*(Roles = "Moderator")*/]
+        [Authorize(Roles = "Moderator")]
         public async Task<IActionResult> Edit(long? id)
         {
             if (id == null)
@@ -160,7 +163,7 @@ namespace MusicAssistant_CoreMVC.Controllers
         }
 
         // GET: Album/Delete/5
-        [Authorize/*(Roles = "Moderator")*/]
+        [Authorize(Roles = "Moderator")]
         public async Task<IActionResult> Delete(long? id)
         {
             if (id == null)
@@ -181,7 +184,6 @@ namespace MusicAssistant_CoreMVC.Controllers
         // POST: Album/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        [Authorize/*(Roles = "Moderator")*/]
         public async Task<IActionResult> DeleteConfirmed(long id)
         {
             var albumModel = await _context.Albums.SingleOrDefaultAsync(m => m.Id == id);
@@ -195,6 +197,7 @@ namespace MusicAssistant_CoreMVC.Controllers
             return _context.Albums.Any(e => e.Id == id);
         }
 
+        [Authorize]
         public IActionResult AddOrRemoveCollection(long? id)
         {
             var userCollectionModel = new UserCollectionModel();
@@ -220,6 +223,36 @@ namespace MusicAssistant_CoreMVC.Controllers
             var album = _context.Albums.Single(x => userCollectionModel.Song.Album.Id == x.Id);
 
             return Redirect("/Album/Details/" + album.Id);
+        }
+
+        [Authorize]
+        public IActionResult AddAlbumToCollection(long? id)
+        {
+            var user = _context.Users.Single(x => x.UserName == User.Identity.Name);
+            var album = _context.Albums.Single(x => x.Id == id);
+            _context.Entry(album).Collection(x => x.Song).Load();
+
+            foreach (var song in album.Song)
+            {
+                var userCollectionModel = new UserCollectionModel();
+
+                userCollectionModel.User = user;
+                userCollectionModel.Song = song;
+
+                if (_context.UserCollections
+                    .Where(x => x.SongId == id && x.UserId == user.Id)
+                    .Count() == 0)
+                {
+                    try
+                    {
+                        _context.Add(userCollectionModel);
+                        _context.SaveChanges();
+                    }
+                    catch { }
+                }
+            }
+
+            return Redirect("/Album/Details/" + id);
         }
     }
 }

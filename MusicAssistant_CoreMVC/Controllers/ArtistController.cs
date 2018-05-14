@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MusicAssistantMvcCore.Models;
 using MusicAssistant_CoreMVC.Data;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MusicAssistant_CoreMVC.Controllers
 {
@@ -40,10 +41,13 @@ namespace MusicAssistant_CoreMVC.Controllers
                 return NotFound();
             }
 
+            _context.Entry(artistModel).Collection(x => x.UserFollow).Load();
+
             return View(artistModel);
         }
 
         // GET: Artist/Create
+        [Authorize(Roles = "Moderator")]
         public IActionResult Create()
         {
             return View();
@@ -66,6 +70,7 @@ namespace MusicAssistant_CoreMVC.Controllers
         }
 
         // GET: Artist/Edit/5
+        [Authorize(Roles = "Moderator")]
         public async Task<IActionResult> Edit(long? id)
         {
             if (id == null)
@@ -117,6 +122,7 @@ namespace MusicAssistant_CoreMVC.Controllers
         }
 
         // GET: Artist/Delete/5
+        [Authorize(Roles = "Moderator")]
         public async Task<IActionResult> Delete(long? id)
         {
             if (id == null)
@@ -143,6 +149,38 @@ namespace MusicAssistant_CoreMVC.Controllers
             _context.Artists.Remove(artistModel);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        [Authorize]
+        public IActionResult FollowOrUnfollow(long? id)
+        {
+            var user = _context.Users.Single(x => x.UserName == User.Identity.Name);
+            var artist = _context.Artists.Single(x => x.Id == id);
+
+            var userFollow = new UserFollowModel();
+
+            userFollow.User = user;
+            userFollow.Artist = artist;
+
+            if (_context.UserFollows
+                .Where(x => x.ArtistId == id && x.UserId == user.Id)
+                .Count() == 0)
+            {
+                try
+                {
+                    _context.Add(userFollow);
+                    _context.SaveChanges();
+                }
+                catch { }
+            }
+            else
+            {
+                _context.Remove(userFollow);
+                _context.SaveChanges();
+            }
+
+
+            return Redirect("/Artist/Details/" + id);
         }
 
         private bool ArtistModelExists(long id)

@@ -7,6 +7,9 @@
 <h2>Details</h2>
 
 <div>
+    <a asp-action="AddAlbumToCollection" asp-controller="Album" asp-route-id="@Model.Id">Add full album</a>
+</div>
+<div>
     <h4>AlbumModel</h4>
     <hr />
     <dl class="dl-horizontal">
@@ -56,13 +59,16 @@
                         @Html.DisplayFor(modelItem => item.Name)
                     </td>
                     <td>
-                        @if (Model.UserCollections.Where(x => x.SongId == item.Id).Count() == 0)
+                        @if (Model.UserCollections != null)
                         {
-                            <a asp-action="AddOrRemoveCollection" asp-controller="Album" asp-route-id="@item.Id">+</a>
-                        }
-                        else
-                        {
-                            <a asp-action="AddOrRemoveCollection" asp-controller="Album" asp-route-id="@item.Id">x</a>
+                            if (Model.UserCollections.Where(x => x.SongId == item.Id).Count() == 0)
+                            {
+                                <a asp-action="AddOrRemoveCollection" asp-controller="Album" asp-route-id="@item.Id">+</a>
+                            }
+                            else
+                            {
+                                <a asp-action="AddOrRemoveCollection" asp-controller="Album" asp-route-id="@item.Id">x</a>
+                            }
                         }
                     </td>
                 </tr>
@@ -71,6 +77,9 @@
     </table>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
+    @if (User.IsInRole("Moderator"))
+    {
+        <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> 
+    }
     <a asp-action="Index">Back to List</a>
 </div>
