@@ -43,7 +43,9 @@ namespace MusicAssistant_CoreMVC.Controllers
             }
 
             var albumModel = await _context.Albums.SingleOrDefaultAsync(m => m.Id == id);
+
             _context.Entry(albumModel).Collection(x => x.Song).Load();
+            _context.Entry(albumModel).Reference(x => x.Artist).Load();
 
             var p = new AlbumViewModel();
             p.Id = albumModel.Id;

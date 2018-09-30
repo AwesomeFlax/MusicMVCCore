@@ -32,12 +32,42 @@ namespace MusicAssistant_CoreMVC.Controllers
         public IActionResult Index()
         {
             var songsList = _context.Songs.ToList();
-            foreach(var song in songsList)
+            foreach (var song in songsList)
             {
                 _context.Entry(song).Reference(x => x.Album).Load();
             }
 
+            ViewBag.Artists = new SelectList(_context.Artists, "Id", "Name");
+            ViewBag.Albums = new SelectList(_context.Albums, "Id", "Name");
+
             return View(songsList);
+        }
+
+        public IActionResult Filter(int artist, int album)
+        {
+            var songsList = _context.Songs.ToList();
+            foreach (var song in songsList)
+            {
+                _context.Entry(song).Reference(x => x.Album).Load();
+            }
+
+            if (artist != 0)    // if we are filtering by artist
+            {
+                var artistAlbums = _context.Artists.Single(x => x.Id == artist);
+                _context.Entry(artistAlbums).Collection(x => x.Album).Load();
+                var fittingAlbums = artistAlbums.Album;
+                songsList = songsList.Where(x => fittingAlbums.Contains(x.Album)).ToList();
+                ViewBag.Albums = new SelectList(_context.Albums.Where(x => x.Artist.Id == artist), "Id", "Name");
+            }
+            else                // if we are filtering by album
+            {
+                songsList = songsList.Where(x => x.Album.Id == album).ToList();
+                ViewBag.Albums = new SelectList(_context.Albums, "Id", "Name");
+            }
+
+            ViewBag.Artists = new SelectList(_context.Artists, "Id", "Name");
+
+            return View("Index", songsList);
         }
 
         // GET: Song/Details/5
@@ -106,7 +136,7 @@ namespace MusicAssistant_CoreMVC.Controllers
             p.SongText = songModel.SongText;
             p.Album = songModel.Album;
             p.AlbumsList = _context.Albums.ToList();
-           
+
             return View(p);
         }
 

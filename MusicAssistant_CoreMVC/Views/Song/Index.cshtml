@@ -6,9 +6,30 @@
 
 <h2>Index</h2>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
+<div class="col-md-3 d-inline">
+    @Html.DropDownList("Artists", ViewBag.Artists as SelectList, "- Select artist -",
+        new { @onchange= "filterByArtist(this.value)", @class = "form-control" })
+</div>
+
+<div class="col-md-3 d-inline">
+    @Html.DropDownList("Albums", ViewBag.Albums as SelectList, "- Select album -",
+        new { @onchange = "filterByAlbum(this.value)", @class = "form-control" })
+</div>
+
+<div class="col-md-2 d-inline">
+    <a asp-action="Create" class="btn">— Add New — </a>
+</div>
+
+<script>
+    function filterByArtist(val) {
+        window.location.href = "/Song/Filter?artist=" + val;
+    }
+
+    function filterByAlbum(val) {
+        window.location.href = "/Song/Filter?album=" + val;
+    }
+</script>
+
 <table class="table">
     <thead>
         <tr>

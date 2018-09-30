@@ -10,76 +10,125 @@
     <a asp-action="AddAlbumToCollection" asp-controller="Album" asp-route-id="@Model.Id">Add full album</a>
 </div>
 <div>
-    <h4>AlbumModel</h4>
-    <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.Genre)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.Genre)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.Created)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.Created)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dd>
-            <img src="@Url.Content(Model.AlbumPhotoUrl)" style="height:250px;width:250px;" />
-        </dd>
-    </dl>
-</div>
-<div>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>
-                    @Html.DisplayNameFor(model => model.Song)
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model.Song)
-            {
-                <tr>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Name)
-                    </td>
-                    <td>
-                        @if (Model.UserCollections != null)
-                        {
-                            if (Model.UserCollections.Where(x => x.SongId == item.Id).Count() == 0)
-                            {
-                                <a asp-action="AddOrRemoveCollection" asp-controller="Album" asp-route-id="@item.Id">+</a>
-                            }
-                            else
-                            {
-                                <a asp-action="AddOrRemoveCollection" asp-controller="Album" asp-route-id="@item.Id">x</a>
-                            }
-                        }
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</div>
-<div>
     @if (User.IsInRole("Moderator"))
     {
-        <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> 
+        <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a>
     }
     <a asp-action="Index">Back to List</a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="mx-auto my-3">
+            <div class="form-control">
+                <div class="row">
+                    <div class="col-md-5">
+                        <img src="@Url.Content(Model.AlbumPhotoUrl)" alt="Album Cover" class="d-inline img-fluid img-thumbnail m-md-2">
+                        <hr>
+                        <ul class="nav nav-tabs" id="myTab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="information-tab" href="#information" data-toggle="tab" role="tab" aria-controls="home" aria-selected="true">
+                                    Information
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="description-tab" href="#description" data-toggle="tab" role="tab" aria-controls="profile" aria-selected="false">
+                                    Description
+                                </a>
+                            </li>
+                        </ul>
+                        <div class="tab-content" id="myTabContent">
+                            <div class="tab-pane fade show active" id="information" role="tabpanel" aria-labelledby="information-tab">
+                                <div class="column">
+                                    <div class="row justify-content-center">
+                                        <div class="col-5">
+                                            <p class="lead">Artist:</p>
+                                        </div>
+                                        <div class="col-5">
+                                            <p class="lead">
+                                                <a [routerLink]="['/artist', artistID]">@Html.DisplayFor(model => model.Artist.Pseudonym)</a>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="row justify-content-center">
+                                        <div class="col-5">
+                                            <p class="lead">Genre:</p>
+                                        </div>
+                                        <div class="col-5">
+                                            <p class="lead">@Html.DisplayFor(model => model.Genre)</p>
+                                        </div>
+                                    </div>
+                                    <div class="row justify-content-center">
+                                        <div class="col-5">
+                                            <p class="lead">Released:</p>
+                                        </div>
+                                        <div class="col-5">
+                                            <p class="lead">@Html.DisplayFor(model => model.Created)</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="description" role="tabpanel" aria-labelledby="description-tab">
+                                <div class="column">
+                                    <div class="row justify-content-center">
+                                        <div class="col-10">
+                                            <p class="lead">
+                                                @Html.DisplayFor(model => model.Description)
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-7">
+                        <div class="row justify-content-between mx-auto">
+                            <h3 class="my-auto"> @Html.DisplayFor(model => model.Name)</h3>
+                            <button class="btn btn-lg btn-outline-primary">
+                                Add
+                                <!--Added-->
+                            </button>
+                        </div>
+                        <hr>
+                        <div class="column justify-content-between mx-auto">
+                            <div>
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                @Html.DisplayNameFor(model => model.Song)
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.Song)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.Name)
+                                                </td>
+                                                <td>
+                                                    @if (Model.UserCollections != null)
+                                                    {
+                                                        if (Model.UserCollections.Where(x => x.SongId == item.Id).Count() == 0)
+                                                        {
+                                                            <a asp-action="AddOrRemoveCollection" asp-controller="Album" asp-route-id="@item.Id">+</a>
+                                                        }
+                                                        else
+                                                        {
+                                                            <a asp-action="AddOrRemoveCollection" asp-controller="Album" asp-route-id="@item.Id">x</a>
+                                                        }
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
